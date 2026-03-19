@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>
-  window.onload = function() {
-    emailjs.init("K6b_B_2CQGGn15vZf");
-  };
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Restore Rashidun</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("K6b_B_2CQGGn15vZf");
+</script>
+
 <style>
   :root {
     --black: #080808;
@@ -463,6 +464,7 @@
   }
 </style>
 </head>
+
 <body>
 
 <div class="cursor" id="cursor"></div>
@@ -612,8 +614,8 @@
 </footer>
 
 <script>
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzCsqNxJf4FZlyF4w4TcTojKpaJLeSnD3y-e7Cz-bb3GvtNVI9_6D8fGmossuZQBkLv/exec';
 
-  
   // Cursor
   const cursor = document.getElementById('cursor');
   document.addEventListener('mousemove', e => {
@@ -625,7 +627,7 @@
     el.addEventListener('mouseleave', () => cursor.classList.remove('expand'));
   });
 
-  // Live counter — fetches real row count from Google Sheets via JSONP
+  // Live counter
   let count = 0;
 
   function animateCounter(start, target) {
@@ -650,8 +652,6 @@
 
   window.addEventListener('load', () => setTimeout(loadCounter, 400));
 
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzCsqNxJf4FZlyF4w4TcTojKpaJLeSnD3y-e7Cz-bb3GvtNVI9_6D8fGmossuZQBkLv/exec';
-
   async function submitForm() {
     const first = document.getElementById('firstName').value.trim();
     const last  = document.getElementById('lastName').value.trim();
@@ -665,7 +665,6 @@
       return;
     }
 
-    // Collect checkboxes
     const checked = [...document.querySelectorAll('.checkbox-group input:checked')]
       .map(cb => cb.value).join(', ');
 
@@ -679,10 +678,10 @@
       notes:     document.getElementById('notes').value.trim()
     };
 
-    // Disable button while sending
     const btn = document.querySelector('.btn-submit span');
     btn.textContent = 'Sending...';
 
+    // Submit to Google Sheets
     try {
       await fetch(SHEET_URL, {
         method: 'POST',
@@ -691,52 +690,25 @@
         body: JSON.stringify(payload)
       });
     } catch (err) {
-      console.error('Submission error:', err);
+      console.error('Sheets error:', err);
     }
 
-    function submitForm() {
-  const firstName = document.getElementById("firstName").value.trim();
-  const lastName  = document.getElementById("lastName").value.trim();
-  const email     = document.getElementById("email").value.trim();
-  const phone     = document.getElementById("phone").value.trim();
-  const area      = document.getElementById("area").value.trim();
-  const notes     = document.getElementById("notes").value.trim();
+    // Send welcome email via EmailJS
+    try {
+      await emailjs.send("service_24o3nld", "template_xiguf4n", {
+        first_name: first,
+        last_name:  last,
+        email:      email,
+        phone:      payload.phone || 'Not provided',
+        area:       payload.area,
+        can_help:   checked || 'Just attending',
+        notes:      payload.notes || 'None',
+      });
+    } catch (err) {
+      console.error('EmailJS error:', err);
+    }
 
-  if (!firstName || !email) {
-    alert("Please enter your first name and email.");
-    return;
-  }
-
-  const checked = [...document.querySelectorAll(".checkbox-group input:checked")]
-    .map(cb => cb.value)
-    .join(", ") || "None selected";
-
-  emailjs.send("service_24o3nld","template_xiguf4n", {
-    first_name: firstName,
-    last_name:  lastName,
-    email:      email,
-    phone:      phone || "Not provided",
-    area:       area,
-    can_help:   checked,
-    notes:      notes || "None",
-  })
-  .then(() => {
-    document.getElementById("registerForm").innerHTML = `
-      <div style="text-align:center; padding: 2rem;">
-        <h2>You're registered! ✊</h2>
-        <p>A confirmation email has been sent to <strong>${email}</strong>.</p>
-      </div>
-    `;
-  })
-  .catch((err) => {
-    console.error(err);
-    alert("Something went wrong. Please try again.");
-
-    console.log("Form submitted!");
-  });
-}
-
-    // Increment counter & show success regardless (no-cors means we can't read the response)
+    // Show success
     count++;
     document.getElementById('counter').textContent = count;
     document.getElementById('registerForm').style.display = 'none';
