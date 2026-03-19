@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("K6b_B_2CQGGn15vZf");
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Restore Rashidun</title>
@@ -606,6 +610,8 @@
 </footer>
 
 <script>
+
+  
   // Cursor
   const cursor = document.getElementById('cursor');
   document.addEventListener('mousemove', e => {
@@ -685,6 +691,46 @@
     } catch (err) {
       console.error('Submission error:', err);
     }
+
+    function submitForm() {
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName  = document.getElementById("lastName").value.trim();
+  const email     = document.getElementById("email").value.trim();
+  const phone     = document.getElementById("phone").value.trim();
+  const area      = document.getElementById("area").value.trim();
+  const notes     = document.getElementById("notes").value.trim();
+
+  if (!firstName || !email) {
+    alert("Please enter your first name and email.");
+    return;
+  }
+
+  const checked = [...document.querySelectorAll(".checkbox-group input:checked")]
+    .map(cb => cb.value)
+    .join(", ") || "None selected";
+
+  emailjs.send("service_24o3nld", "template_xiguf4n", {
+    first_name: firstName,
+    last_name:  lastName,
+    email:      email,
+    phone:      phone || "Not provided",
+    area:       area,
+    can_help:   checked,
+    notes:      notes || "None",
+  })
+  .then(() => {
+    document.getElementById("registerForm").innerHTML = `
+      <div style="text-align:center; padding: 2rem;">
+        <h2>You're registered! ✊</h2>
+        <p>A confirmation email has been sent to <strong>${email}</strong>.</p>
+      </div>
+    `;
+  })
+  .catch((err) => {
+    console.error(err);
+    alert("Something went wrong. Please try again.");
+  });
+}
 
     // Increment counter & show success regardless (no-cors means we can't read the response)
     count++;
