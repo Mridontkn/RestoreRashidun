@@ -3,7 +3,7 @@
 <head>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
-  emailjs.init(K6b_B_2CQGGn15vZf);
+  emailjs.init("K6b_B_2CQGGn15vZf");
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -709,7 +709,7 @@
     .map(cb => cb.value)
     .join(", ") || "None selected";
 
-  emailjs.send(service_24o3nld, template_xiguf4n, {
+  emailjs.send("service_24o3nld", "template_xiguf4n", {
     first_name: firstName,
     last_name:  lastName,
     email:      email,
